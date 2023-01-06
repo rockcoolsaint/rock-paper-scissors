@@ -9,12 +9,16 @@ const cancelCreateActionBtn = document.getElementById("cancel-create-action");
 const gameplayChoices = document.getElementById("gameplay-choices");
 const createRoomBtn = document.getElementById("create-room-btn");
 const gameplayScreen = document.querySelector(".gameplay-screen");
+const gameplay = document.getElementById("gameplay");
 const startScreen = document.querySelector(".start-screen");
 const cancelJoinActionBtn = document.getElementById("cancel-join-action");
 const joinBoxRoom = document.getElementById("join-room-box");
 const joinRoomBtn = document.getElementById("join-room-btn");
 const joinRoomInput = document.getElementById("join-room-input");
 const joinRandomBtn = document.getElementById("join-random");
+const gameRoundsBox = document.getElementById("game-rounds-box");
+const gameRoundsInput = document.getElementById("rounds-input");
+const gameRoundsBtn = document.getElementById("rounds-btn");
 const errorMessage = document.getElementById("error-message");
 const playerOne = document.getElementById("player-1");
 const playerTwo = document.getElementById("player-2");
@@ -27,6 +31,10 @@ const enemyScore = document.getElementById('enemy-score');
 const playerOneTag = document.getElementById("player-1-tag");
 const playerTwoTag = document.getElementById("player-2-tag");
 const winMessage = document.getElementById("win-message");
+const gameChoices = document.querySelector(".choices");
+const gameOverMessageBox = document.getElementById("game-over-message");
+const restartGameBtn = document.getElementById("reset-play-btn");
+const pausePlayBtn = document.getElementById("pause-play-btn");
 
 //  Game variables
 let canChoose = false;
@@ -38,6 +46,7 @@ let enemyChoice = "";
 let roomId = "";
 let myScorePoints = 0;
 let enemyScorePoints = 0;
+let gameOver = false;
 
 openCreateRoomBox.addEventListener("click", function(){
     gameplayChoices.style.display = "none";
@@ -52,6 +61,9 @@ cancelCreateActionBtn.addEventListener("click", function(){
 createRoomBtn.addEventListener("click", function(){
     let id = roomIdInput.value;
 
+    gameRoundsBox.style.display = "none";
+    gameplay.style.pointerEvents = "none";
+    gameplay.style.opacity = "0.5";
     errorMessage.innerHTML = "";
     errorMessage.style.display = "none";
 
@@ -68,6 +80,13 @@ cancelJoinActionBtn.addEventListener("click", function(){
     joinBoxRoom.style.display = "none";
 })
 
+gameRoundsBtn.addEventListener("click", function() {
+    let rounds = gameRoundsInput.value;
+    gameRoundsBox.style.display = "none";
+
+    socket.emit("set-game-rounds", {roomId, rounds});
+})
+
 joinRoomBtn.addEventListener("click", function(){
     let id = joinRoomInput.value;
 
@@ -81,6 +100,27 @@ joinRandomBtn.addEventListener("click", function(){
     errorMessage.innerHTML = "";
     errorMessage.style.display = "none";
     socket.emit("join-random");
+})
+
+restartGameBtn.addEventListener("click", function(){
+    if(playerId === 1) {
+        gameRoundsBox.style.display = "block";
+        gameOverMessageBox.innerHTML = "";
+        myScorePoints = 0;
+        enemyScorePoints = 0;
+
+        myScore.innerHTML = 0;
+        enemyScore.innerHTML = 0;
+    } else {
+        gameOverMessageBox.innerHTML = "";
+        gameChoices.style.pointerEvents = "auto";
+        gameChoices.style.opacity = "1.0";
+        myScorePoints = 0;
+        enemyScorePoints = 0;
+
+        myScore.innerHTML = 0;
+        enemyScore.innerHTML = 0;
+    }
 })
 
 rock.addEventListener("click", function(){
@@ -125,6 +165,13 @@ socket.on("room-created", id => {
     gameplayScreen.style.display = "block";
 })
 
+socket.on("game-rounds-set", rounds => {
+    gameplay.style.pointerEvents = "auto";
+    gameplay.style.opacity = "1.0";
+    gameChoices.style.pointerEvents = "auto";
+    gameChoices.style.opacity = "1.0";
+})
+
 socket.on("room-joined", id => {
     playerId = 2;
     roomId = id;
@@ -134,8 +181,15 @@ socket.on("room-joined", id => {
     setPlayerTag(2);
     setWaitMessage(false);
 
+    // display rounds config input box
+    // gameRoundsBox.style.display = "block";
+
     startScreen.style.display = "none";
     gameplayScreen.style.display = "block";
+
+    // disable and blur player 2 until game rounds configured by player 1
+    // gameplay.style.pointerEvents = "none";
+    // gameplay.style.opacity = "0.5";
 })
 
 socket.on("player-1-connected", () => {
@@ -148,6 +202,11 @@ socket.on("player-2-connected", () => {
     playerTwoIsConnected = true
     canChoose = true;
     setWaitMessage(false);
+
+    if(playerId === 1) {
+        // display rounds config input box
+        gameRoundsBox.style.display = "block";
+    }
 });
 
 socket.on("player-1-disconnected", () => {
@@ -195,13 +254,52 @@ socket.on("player-2-wins", ({myChoice, enemyChoice}) => {
     displayScore()
 })
 
+socket.on("game-over", (gameMessage) => {
+    // console.log("Game Over!")
+    gameOver = true;
+
+    if(playerId === 1){
+        if (myScorePoints == enemyScorePoints) {
+            let message = "This match ended in a draw!"
+            // setWinningMessage(message);
+            gameOverMessage(message)
+        } else if (myScorePoints > enemyScorePoints) {
+            let message = "Congrats! You Won!";
+            // setWinningMessage(message);
+            gameOverMessage(message)
+        } else {
+            let message = "Sorry...You lost this match!.";
+            // setWinningMessage(message);
+            gameOverMessage(message)
+        }
+    }else{
+        if (myScorePoints == enemyScorePoints) {
+            let message = "This match ended in a draw!"
+            // setWinningMessage(message);
+            gameOverMessage(message)
+        } else if (myScorePoints > enemyScorePoints) {
+            let message = "Congrats! You Won!";
+            // setWinningMessage(message);
+            gameOverMessage(message)
+        } else {
+            let message = "Sorry...Your opponent Won.";
+            // setWinningMessage(message);
+            gameOverMessage(message)
+        }
+    }
+
+    // disable choices box
+    gameChoices.style.pointerEvents = "none";
+    gameChoices.style.opacity = "0.5"
+})
+
 // Functions
 function setPlayerTag(playerId){
     if(playerId === 1){
         playerOneTag.innerText = "You (Player 1)";
-        playerTwoTag.innerText = "Enemy (Player 2)";
+        playerTwoTag.innerText = "Opponent (Player 2)";
     }else{
-        playerOneTag.innerText = "Enemy (Player 2)";
+        playerOneTag.innerText = "Opponent (Player 2)";
         playerTwoTag.innerText = "You (Player 1)";
     }
 }
@@ -281,9 +379,16 @@ function setWinningMessage(message){
     p.innerText = message;
 
     winMessage.appendChild(p);
-
+    
     setTimeout(() => {
         removeChoice(myChoice)
         winMessage.innerHTML = "";
     }, 2500)
+}
+
+function gameOverMessage(message){
+    let p  = document.createElement("p");
+    p.innerText = message;
+
+    gameOverMessageBox.appendChild(p);
 }

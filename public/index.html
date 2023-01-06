@@ -34,45 +34,60 @@
             <button class="join-random" id="join-random">Join Random</button>
         </div>
 
+
         <div class="error-message" id="error-message">
         </div>
     </div>
 
     <div class="gameplay-screen">
-        <div class="wait-message" id="wait-message">
-            <p>Waiting for another player to join...</p>
+        <div class="game-rounds-config-screen" id="game-rounds-box">
+            <span>Rounds per game: </span><input type="number" id="rounds-input"><button id="rounds-btn">Go</button>
         </div>
-
-        <div class="connected-players">
-            <div class="player">
-                <span class="dot" id="player-1"></span> <span id="player-1-tag"></span>
+        
+        <div id="gameplay">
+            <div class="wait-message" id="wait-message">
+                <p>Waiting for another player to join...</p>
+            </div>
+    
+            <div class="connected-players">
+                <div class="player">
+                    <span class="dot" id="player-1"></span> <span id="player-1-tag"></span>
+                </div>
+    
+                <div class="player">
+                    <span class="dot" id="player-2"></span> <span id="player-2-tag"></span>
+                </div>
+            </div>
+    
+            <div class="choices">
+                <div class="choice" id="rock">
+                    <i class="fas fa-hand-rock"></i>
+                </div>
+    
+                <div class="choice" id="paper">
+                    <i class="fas fa-hand-paper"></i>
+                </div>
+    
+                <div class="choice" id="scissor">
+                    <i class="fas fa-hand-scissors"></i>
+                </div>
+            </div>
+    
+            <div class="score">
+                <span>You: <span id="my-score">0</span></span>
+                <span>Opponent: <span id="enemy-score">0</span></span>
             </div>
 
-            <div class="player">
-                <span class="dot" id="player-2"></span> <span id="player-2-tag"></span>
+            <div class="game-option-buttons">
+                <button id="reset-play-btn">reset/restart</button>
+                <button id="pause-play-btn">Pause/play</button>
             </div>
-        </div>
-
-        <div class="choices">
-            <div class="choice" id="rock">
-                <i class="fas fa-hand-rock"></i>
+    
+            <div class="message-after-choice-selection" id="win-message">
             </div>
 
-            <div class="choice" id="paper">
-                <i class="fas fa-hand-paper"></i>
+            <div class="message-after-game-over" id="game-over-message">
             </div>
-
-            <div class="choice" id="scissor">
-                <i class="fas fa-hand-scissors"></i>
-            </div>
-        </div>
-
-        <div class="score">
-            <span>You: <span id="my-score">0</span></span>
-            <span>Enemy: <span id="enemy-score">0</span></span>
-        </div>
-
-        <div class="message-after-choice-selection" id="win-message">
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>

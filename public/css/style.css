@@ -24,6 +24,11 @@ body {
     margin-bottom: 40px;
 }
 
+.game-rounds-config-screen {
+    display: block;
+    text-align: center;
+}
+
 .gameplay-choices button {
     padding: 5px 25px;
     background: #189116;
@@ -45,7 +50,8 @@ body {
 }
 
 .join-with-id,
-.create-room-box {
+.create-room-box,
+.game-rounds-config-screen {
     width: 70%;
     margin: 0 auto;
 }
@@ -60,8 +66,24 @@ body {
     margin: 0;
 }
 
+.game-rounds-config-screen {
+    width: 70%;
+    margin: 0 auto;
+    display: none;
+}
+
+.game-rounds-config-screen input {
+    width: 30%;
+    height: 35px;
+    border: 1px solid #333;
+    outline: none;
+    padding: 5px;
+    margin: 0;
+}
+
 .join-with-id button,
-.create-room-box button {
+.create-room-box button,
+.game-rounds-config-screen button {
     width: 20%;
     margin: 0;
     height: 35px;
@@ -179,13 +201,29 @@ body {
     margin-bottom: 20px;
 }
 
-.message-after-choice-selection {
+.game-option-buttons {
+    width: 60%;
+    margin: 0 auto;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-option-buttons > button {
+    margin: 10px;
+}
+
+.message-after-choice-selection,
+.message-after-game-over {
     width: 80%;
     margin: 0 auto;
     margin-top: 60px;
 }
 
-.message-after-choice-selection p {
+.message-after-choice-selection,
+.message-after-game-over p {
     text-align: center;
     font-size: 1.2rem;
 }

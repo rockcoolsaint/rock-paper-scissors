@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const io = socketio(server);
 
-const {userConnected, connectedUsers, initializeChoices, moves, makeMove, choices} = require("./util/users");
+const {userConnected, connectedUsers, initializeChoices, moves, makeMove, choices, setGameRounds} = require("./util/users");
 const {createRoom, joinRoom, exitRoom, rooms} = require("./util/rooms");
 const e = require("express");
 const { exitCode } = require("process");
@@ -27,7 +27,19 @@ io.on("connection", socket => {
             socket.emit("room-created", roomId);
             socket.emit("player-1-connected");
             socket.join(roomId);
+            // initializeChoices(roomId); // initialize choices before an opponent joins you
+
+            console.log(`choices upon room-created: ${choices[roomId]}`)
         }
+    })
+
+    socket.on("set-game-rounds", ({roomId, rounds}) => {
+        let playRounds = parseInt(rounds);
+
+        setGameRounds(roomId, playRounds);
+        console.log(`choices: ${choices[roomId]}`);
+
+        socket.emit("game-rounds-set", rounds);
     })
 
     socket.on("join-room", roomId => {
@@ -72,7 +84,12 @@ io.on("connection", socket => {
     });
 
     socket.on("make-move", ({playerId, myChoice, roomId}) => {
+        console.log(`choices on make-move: ${choices[roomId]}`)
         makeMove(roomId, playerId, myChoice);
+        // let rounds = choices[roomId][2];
+        // let count = choices[roomId][3];
+
+        // console.log(`choices on make-move: ${choices[roomId]}`)
 
         if(choices[roomId][0] !== "" && choices[roomId][1] !== ""){
             let playerOneChoice = choices[roomId][0];
@@ -104,7 +121,20 @@ io.on("connection", socket => {
                 io.to(roomId).emit("player-2-wins", {myChoice, enemyChoice});
             }
 
-            choices[roomId] = ["", ""];
+            // choices[roomId] = ["", ""];
+            choices[roomId][0] = "";
+            choices[roomId][1] = "";
+
+            // if count == rounds, then game over
+            if (choices[roomId][3] == choices[roomId][2]) {
+                // GameOver and overall results
+                console.log("Game Over")
+                choices[roomId][3] = 0;
+                let gameOverMessage = "Game Over!"
+                io.to(roomId).emit("game-over", gameOverMessage, roomId);
+            } else {
+                choices[roomId][3]++;
+            }
         }
     });
 
